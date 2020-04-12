@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.goods.dao.GoodsDao">
+
+
+    <!--统计商品数量-->
+	<select id="countGoods" parameterType="com.goods.entity.GoodsInfo" resultType="int">
+        select count(commodity_name)
+        from commoditymanagement
+        where id_delete = 0
+        and commodity_name = #{commodityName}
+    </select>
+
+
+    <!--新增商品-->
+    <insert id="addGoods" parameterType="com.goods.entity.GoodsInfo">
+        insert into commoditymanagement
+        (	commodity_Id,
+	        commodity_name,
+	        price,
+        	selling_price,
+	        sales_volume,
+	        classification_two,
+        	classification_one,
+	        advertising_words,
+        	image,
+	        commodity_introduce,
+	        author,
+	        commodity_state,
+	        press,
+	        name_of_merchant,
+	        book_number,
+	        stock,
+	        id_delete,
+	        create_time,
+	        create_user,
+	        supdate_time,
+	        supdate_user,
+        	ediition)
+        values
+         (	#{commodityId},
+	        #{commodityName},
+	        #{price},
+        	#{sellingPrice},
+	        #{salesVolume},
+	        #{classificationTwo},
+        	#{classificationOne},
+	        #{advertisingWords},
+        	#{image},
+	        #{commodityIntroduce},
+	        #{author},
+	        #{commodityState},
+	        #{press},
+	        #{nameOfMerchant},
+	        #{IsbnBook},
+	        #{goodsSalesVolume},
+	        #{deleteTag},
+	        #{creationTime},
+	        #{creator},
+	        #{modificationTime},
+	        #{modifier},
+        	#{deleteTag})
+    </insert>
+	<!--商品列表-->
+	<select id="listGoodsByPage" parameterType="com.goods.entity.GoodsInfo" resultType="com.goods.entity.GoodsInfo">
+		select
+		commodity_Id,
+		commodity_name,
+		price,
+		selling_price,
+		sales_volume,
+		classification_two,
+		classification_one,
+		advertising_words,
+		image,
+		commodity_introduce,
+		author,
+		commodity_state,
+		press,
+		name_of_merchant,
+		book_number,
+		stock,
+		id_delete,
+		create_time,
+		create_user,
+		supdate_time,
+		supdate_user,
+		ediition
+		from commoditymanagement a
+		where a.id_delete = 0
+		<if test="commodityName != null and commodityName != ''">
+			and a.commodity_name like concat('%', #{commodityName}, '%')
+		</if>
+		<if test="press != null and press != ''">
+			and a.press like concat('%', #{press}, '%')
+		</if>
+		<if test="commodityState != null and commodityState != ''">
+			and a.commodity_state like concat('%', #{commodityState}, '%')
+		</if>
+		<if test="author != null and author != ''">
+			and a.author like concat('%', #{author}, '%')
+		</if>
+		<if test="advertisingWords != null and advertisingWords != ''">
+			and a.advertising_words like concat('%', #{advertisingWords}, '%')
+		</if>
+-- 		order by gmt_create desc
+	</select>
+
+	<!--删除商品-->
+	<update id="deleteGoods" parameterType="com.goods.entity.GoodsInfo">
+		update commoditymanagement
+		set
+		id_delete = 1,
+		supdate_time = now(),
+		supdate_user   = #{userId},
+		ediition = ediition + 1
+		where commodity_Id in
+		<foreach item="item" index="index" collection="listGoods" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+	<!--修改商品信息-->
+	<update id="updateGoods" parameterType="com.goods.entity.GoodsInfo">
+        update commoditymanagement
+        set
+        	commodity_Id 		= #{commodityId},
+	        commodity_name 		= #{commodityName},
+	        price 				= #{price},
+        	selling_price		= #{sellingPrice},
+	        classification_two 	= #{classificationTwo},
+        	classification_one	= #{classificationOne},
+	        advertising_words	= #{advertisingWords},
+	        commodity_introduce = #{commodityIntroduce},
+	        commodity_state		= #{commodityState},
+	        press				= #{press},
+	        name_of_merchant	= #{nameOfMerchant},
+	        book_number			= #{IsbnBook},
+	        stock				= #{goodsSalesVolume},
+	        supdate_time		= now(),
+	        supdate_user		= #{modifier},
+        	id_delete			= #{deleteTag},
+            ediition			= ediition + 1
+        where commodity_Id		= #{commodityId}
+          and ediition			= #{versionNumber}
+    </update>
+	<!--上下架商品-->
+	<update id="upDowGoods" parameterType="com.goods.entity.GoodsInfo">
+        update commoditymanagement
+        set
+		<if test="commodityState == 0">
+			commodity_state		= 0
+		</if>
+		<if test="commodityState == 1">
+			commodity_state		= 1
+		</if>
+		where commodity_Id in
+		<foreach item="item" index="index" collection="listGoods" open="(" separator="," close=")">
+		#{item}
+		</foreach>
+    </update>
+	<!--商品信息详情-->
+	<select id="detailsGoods" parameterType="java.lang.String" resultType="com.goods.entity.GoodsInfo">
+        select
+		commodity_Id		commodityId,
+		commodity_name		commodityName,
+		price				,
+		selling_price		sellingPrice,
+		sales_volume		salesVolume,
+		classification_two	classificationTwo,
+		classification_one	classificationOne,
+		advertising_words	advertisingWords,
+		image				,
+		commodity_introduce	commodityIntroduce,
+		author				,
+		commodity_state		commodityState,
+		press				,
+		name_of_merchant	nameOfMerchant,
+		book_number			IsbnBook,
+		stock				goodsSalesVolume,
+		id_delete			deleteTag,
+		create_time			creationTime,
+		create_user			creator,
+		supdate_time		modificationTime,
+		supdate_user		modifier,
+		ediition			deleteTag
+        from commoditymanagement
+        where commodity_Id = #{commodityId}
+    </select>
+</mapper>
